@@ -11,6 +11,7 @@ const authorInfo = document.getElementById('author-info');
 const loading = document.getElementById('loading');
 const noSelection = document.getElementById('no-selection');
 const errorDiv = document.getElementById('error');
+const errorMessage = document.getElementById('error-message');
 const emailList = document.getElementById('email-list');
 const emailsUl = document.getElementById('emails');
 const countInfo = document.getElementById('count-info');
@@ -39,14 +40,14 @@ async function loadEmailsByAuthor(author) {
     });
     
     if (response.error) {
-      showError();
+      showError("Failed to search emails: " + response.error);
       console.error("Error:", response.error);
       return;
     }
     
     displayEmails(author, response.emails);
   } catch (error) {
-    showError();
+    showError("Unable to communicate with background script. Please reload the extension.");
     console.error("Error loading emails:", error);
   }
 }
@@ -55,6 +56,13 @@ async function loadEmailsByAuthor(author) {
  * Display the list of emails
  */
 function displayEmails(author, emails) {
+  // Validate author parameter
+  if (!author || typeof author !== 'string') {
+    console.error("Invalid author parameter:", author);
+    showError("Invalid email author information.");
+    return;
+  }
+  
   // Update author info
   const emailMatch = author.match(/<(.+?)>/);
   const authorEmail = emailMatch ? emailMatch[1] : author;
@@ -132,16 +140,24 @@ function displayEmails(author, emails) {
 function formatDate(dateString) {
   const date = new Date(dateString);
   const now = new Date();
-  const diffTime = Math.abs(now - date);
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  // Compare calendar dates, not timestamps
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dateStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const diffTime = todayStart.getTime() - dateStart.getTime();
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
   
   if (diffDays === 0) {
+    // Today - show time
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   } else if (diffDays === 1) {
+    // Yesterday
     return 'Yesterday';
-  } else if (diffDays < 7) {
+  } else if (diffDays < 7 && diffDays > 0) {
+    // Within last week - show day of week
     return date.toLocaleDateString([], { weekday: 'short' });
   } else {
+    // Older - show full date
     return date.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
   }
 }
@@ -169,7 +185,10 @@ function showEmailList() {
 /**
  * Show error state
  */
-function showError() {
+function showError(message) {
+  if (message) {
+    errorMessage.textContent = message;
+  }
   loading.classList.add('hidden');
   noSelection.classList.add('hidden');
   errorDiv.classList.remove('hidden');

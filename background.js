@@ -3,8 +3,8 @@
  * Background script to handle message display events
  */
 
-// Track the current sidebar panel
-let sidebarPanel = null;
+// Track whether the sidebar is currently open
+let isSidebarOpen = false;
 
 // Listen for message display events
 browser.messageDisplay.onMessageDisplayed.addListener(async (tab, message) => {
@@ -28,9 +28,9 @@ browser.messageDisplay.onMessageDisplayed.addListener(async (tab, message) => {
 async function updateSidebar(tab, author, currentMessage) {
   try {
     // Open the sidebar if not already open
-    if (!sidebarPanel) {
+    if (!isSidebarOpen) {
       await browser.sidebarAction.open();
-      sidebarPanel = true;
+      isSidebarOpen = true;
     }
 
     // Send message to sidebar with author info
@@ -45,7 +45,7 @@ async function updateSidebar(tab, author, currentMessage) {
 }
 
 // Handle messages from the sidebar
-browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+browser.runtime.onMessage.addListener(async (message, sender) => {
   if (message.type === "getEmailsByAuthor") {
     try {
       const emails = await searchEmailsByAuthor(message.author);
@@ -64,7 +64,7 @@ browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
       return Promise.resolve({ success: false, error: error.message });
     }
   }
-  return false;
+  return Promise.resolve();
 });
 
 /**
@@ -72,6 +72,12 @@ browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
  */
 async function searchEmailsByAuthor(author) {
   const results = [];
+  
+  // Validate input
+  if (!author || typeof author !== 'string') {
+    console.error("Invalid author parameter:", author);
+    return results;
+  }
   
   try {
     // Get all mail accounts
