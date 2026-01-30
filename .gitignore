@@ -1,0 +1,29 @@
+# Development files
+.DS_Store
+*.log
+*.swp
+*.swo
+*~
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-*
+
+# Build artifacts
+dist/
+build/
+*.zip
+*.xpi
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# Node modules (if we add any build tools later)
+node_modules/
+package-lock.json
+
+# OS files
+Thumbs.db
