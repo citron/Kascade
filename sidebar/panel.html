@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emails from Author</title>
+  <link rel="stylesheet" href="panel.css">
+</head>
+<body>
+  <div id="container">
+    <div id="header">
+      <h2>Emails from Author</h2>
+      <div id="author-info"></div>
+    </div>
+    
+    <div id="loading" class="hidden">
+      <p>Loading emails...</p>
+    </div>
+    
+    <div id="no-selection" class="message">
+      <p>Select an email to view all messages from the same author.</p>
+    </div>
+    
+    <div id="error" class="message hidden">
+      <p>Error loading emails. Please try again.</p>
+    </div>
+    
+    <div id="email-list" class="hidden">
+      <div id="count-info"></div>
+      <ul id="emails"></ul>
+    </div>
+  </div>
+  
+  <script src="panel.js"></script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+{
+  "manifest_version": 2,
+  "name": "Kascade - Email Author List",
+  "version": "1.0.0",
+  "description": "Displays a list of all emails from the same author when viewing an email",
+  "author": "citron",
+  "applications": {
+    "gecko": {
+      "id": "kascade@citron.github.io",
+      "strict_min_version": "102.0"
+    }
+  },
+  "permissions": [
+    "messagesRead",
+    "accountsRead"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "message_display_action": {
+    "default_title": "Kascade",
+    "default_area": "maintoolbar"
+  },
+  "sidebar_action": {
+    "default_panel": "sidebar/panel.html",
+    "default_title": "Emails from Author"
+  },
+  "icons": {
+    "64": "icons/icon-64.png"
+  }
+}
