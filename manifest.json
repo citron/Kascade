@@ -17,10 +17,6 @@
   "background": {
     "scripts": ["background.js"]
   },
-  "message_display_action": {
-    "default_title": "Kascade",
-    "default_area": "maintoolbar"
-  },
   "sidebar_action": {
     "default_panel": "sidebar/panel.html",
     "default_title": "Emails from Author"

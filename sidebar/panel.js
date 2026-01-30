@@ -3,6 +3,9 @@
  * Sidebar panel script
  */
 
+// Regex pattern for extracting email from "Name <email@domain.com>" format
+const EMAIL_REGEX = /<(.+?)>/;
+
 let currentAuthor = null;
 let currentMessageId = null;
 
@@ -56,17 +59,17 @@ async function loadEmailsByAuthor(author) {
  * Display the list of emails
  */
 function displayEmails(author, emails) {
-  // Validate author parameter
-  if (!author || typeof author !== 'string') {
+  // Validate author parameter (defensive check - shouldn't happen in normal operation)
+  if (!author || typeof author !== 'string' || author.trim() === '') {
     console.error("Invalid author parameter:", author);
-    showError("Invalid email author information.");
+    showError("Unable to display emails: missing author information.");
     return;
   }
   
   // Update author info
-  const emailMatch = author.match(/<(.+?)>/);
+  const emailMatch = author.match(EMAIL_REGEX);
   const authorEmail = emailMatch ? emailMatch[1] : author;
-  const authorName = author.replace(/<.*?>/, '').trim() || authorEmail;
+  const authorName = author.replace(EMAIL_REGEX, '').trim() || authorEmail;
   
   authorInfo.textContent = authorName;
   authorInfo.title = authorEmail;
@@ -115,15 +118,34 @@ function displayEmails(author, emails) {
     li.appendChild(subject);
     li.appendChild(metadata);
     
+    // Add accessibility attributes
+    li.setAttribute('role', 'button');
+    li.setAttribute('tabindex', '0');
+    li.setAttribute('aria-label', `${email.subject} from ${email.folder} on ${formatDate(email.date)}${email.read ? '' : ' (unread)'}${email.id === currentMessageId ? ' (current)' : ''}`);
+    
     // Add click handler
-    li.addEventListener('click', async () => {
+    const openEmail = async () => {
       try {
-        await browser.runtime.sendMessage({
+        const response = await browser.runtime.sendMessage({
           type: "openMessage",
           messageId: email.id
         });
+        if (response && !response.success && response.error) {
+          showError("Unable to open email: " + response.error);
+        }
       } catch (error) {
         console.error("Error opening message:", error);
+        showError("Failed to open email. Please try again.");
+      }
+    };
+    
+    li.addEventListener('click', openEmail);
+    
+    // Add keyboard navigation support
+    li.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        openEmail();
       }
     });
     

@@ -3,6 +3,9 @@
  * Background script to handle message display events
  */
 
+// Regex pattern for extracting email from "Name <email@domain.com>" format
+const EMAIL_REGEX = /<(.+?)>/;
+
 // Track whether the sidebar is currently open
 let isSidebarOpen = false;
 
@@ -49,22 +52,23 @@ browser.runtime.onMessage.addListener(async (message, sender) => {
   if (message.type === "getEmailsByAuthor") {
     try {
       const emails = await searchEmailsByAuthor(message.author);
-      return Promise.resolve({ emails: emails });
+      return { emails: emails };
     } catch (error) {
       console.error("Error searching emails:", error);
-      return Promise.resolve({ emails: [], error: error.message });
+      return { emails: [], error: error.message };
     }
   } else if (message.type === "openMessage") {
     try {
       // Open the message in a new tab
       await browser.mailTabs.setSelectedMessages([message.messageId]);
-      return Promise.resolve({ success: true });
+      return { success: true };
     } catch (error) {
       console.error("Error opening message:", error);
-      return Promise.resolve({ success: false, error: error.message });
+      return { success: false, error: error.message };
     }
   }
-  return Promise.resolve();
+  // Return empty response for unknown message types
+  return {};
 });
 
 /**
@@ -84,7 +88,7 @@ async function searchEmailsByAuthor(author) {
     const accounts = await browser.accounts.list();
     
     // Extract email address from author string (format: "Name <email@domain.com>")
-    const emailMatch = author.match(/<(.+?)>/);
+    const emailMatch = author.match(EMAIL_REGEX);
     const authorEmail = emailMatch ? emailMatch[1] : author;
     
     console.log("Searching for emails from:", authorEmail);
@@ -116,7 +120,7 @@ async function searchFolders(folders, authorEmail, results) {
       do {
         for (const message of page.messages) {
           // Check if the message is from the specified author
-          const messageEmailMatch = message.author.match(/<(.+?)>/);
+          const messageEmailMatch = message.author.match(EMAIL_REGEX);
           const messageEmail = messageEmailMatch ? messageEmailMatch[1] : message.author;
           
           if (messageEmail.toLowerCase() === authorEmail.toLowerCase()) {

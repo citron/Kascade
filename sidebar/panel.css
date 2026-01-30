@@ -67,6 +67,9 @@ body {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
+  /* Firefox scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: #c0c0c0 #f5f5f5;
 }
 
 #emails {
@@ -84,6 +87,11 @@ body {
 
 .email-item:hover {
   background-color: #f0f0f0;
+}
+
+.email-item:focus {
+  outline: 2px solid #2196f3;
+  outline-offset: -2px;
 }
 
 .email-item.current {
@@ -129,7 +137,14 @@ body {
   text-align: right;
 }
 
-/* Scrollbar styling for webkit browsers */
+/* Scrollbar styling */
+/* Firefox */
+#email-list {
+  scrollbar-width: thin;
+  scrollbar-color: #c0c0c0 #f5f5f5;
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
 #email-list::-webkit-scrollbar {
   width: 8px;
 }
